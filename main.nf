@@ -8,7 +8,7 @@ def helpMessage() {
     Usage:
 
     Mandatory arguments:
-      --readPathsFile     Tab-seperated file with sample names and path to the fastq files. (Used if --reads not provided.)
+      --readPaths     Tab-seperated file with sample names and path to the fastq files. (Used if --reads not provided.)
       -profile            Configuration profile to use. slurm? / docker / test ???
 
     """.stripIndent()
@@ -22,16 +22,48 @@ if (params.help){
 
 // Examples below
 
-include {filter_vcf} from './modules/filters.nf'
+include {filltags; filter_vcf_bgz; retain_biallelic; ldprune; keep_samples; annotate_dbsnp; recompress} from './modules/filters.nf'
 
-params.readPaths = "/data/franco/datasets/1000G_high_coverage/20220422_3202_phased_SNV_INDEL_SV/*.vcf.gz"
 
-workflow {
+workflow all {
 
     def vcf_files = Channel.fromPath(params.readPaths)
-    filter_vcf(vcf_files)    
+    //check_params()
 
-    // if (params.run_ge_quant){
-    //     count_features(align_reads.out.bam_sorted_by_name)
-    // }
+    if( params.keepSamples == "") {
+        retain_biallelic(vcf_files)    
+    } else {
+        keep_samples(vcf_files, params.keepSamples)
+        retain_biallelic(keep_samples.output)
+    }
+    
+    filter_vcf_bgz(retain_biallelic.output, params.maf) 
+    
+    //ldprune(filter_vcf.output)
+}
+
+workflow annotate_only {
+
+    def vcf_files = Channel.fromPath(params.filteredVcfs)
+    dbsnpfile = params.dbsnpfile
+    dbsnpfile_index = params.dbsnpfile_index
+    
+    // recompress(vcf_files)
+    // annotate_dbsnp(recompress.output.vcf_bgz, recompress.output.index_vcf, dbsnpfile, dbsnpfile_index)
+    annotate_dbsnp(vcf_files, dbsnpfile, dbsnpfile_index)
+    filltags(annotate_dbsnp.output)
+}
+
+workflow filltags_only {
+
+    def vcf_files = Channel.fromPath(params.filteredVcfs)
+    filltags(vcf_files)
+}
+
+def check_params() {
+
+    params.each{ k, v -> println "params.${k.padRight(25)} = ${v}" }
+    exit 0
+
+    // additional validation here
 }

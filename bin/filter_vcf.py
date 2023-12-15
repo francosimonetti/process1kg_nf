@@ -1,4 +1,4 @@
-#!/home/franco/miniconda3/bin/python
+#!/usr/bin/env python3
 
 import os, re
 import gzip
@@ -45,6 +45,7 @@ if __name__ == '__main__':
     maf_filter=0
     nunkn = 0
     nalle = 0
+    ngtmiss = 0
     with gzip.open(opts.outvcf, 'wb') as outvcf:
         with gzip.open(vcffile, 'r') as vcf:
             for line in vcf:
@@ -58,10 +59,10 @@ if __name__ == '__main__':
                     outvcf.write(line)
                 else:
                     linesplit = linestrip.split("\t")
-                    if linesplit[0].startswith("chr"):
-                        chrom = int(linesplit[0][3:])
-                    else:
-                        int(linesplit[0])
+                    # if linesplit[0].startswith("chr"):
+                    #     chrom = int(linesplit[0][3:])
+                    # else:
+                    #     int(linesplit[0])
                     pos   = int(linesplit[1])
                     varid = linesplit[2]
                     ref   = linesplit[3]
@@ -72,6 +73,10 @@ if __name__ == '__main__':
                     ds = [ float(int(x[0]) + int(x[2])) if len(x) == 3 and x[0] != "." and x[2] != "." else "." for x in gt ]
 
                     ds_notna = [float(x) for x in ds if x != "."]
+                    if len(ds_notna) == 0:
+                        ## all samples have missing genotypes, skip
+                        ngtmiss += 1
+                        continue
                     freq = sum(ds_notna) / 2 / len(ds_notna)
                     maf = freq
                     snpdosage = [float(x) if x != '.' else 2 * freq for x in ds]
@@ -87,9 +92,9 @@ if __name__ == '__main__':
                         nalle += 1
                         continue
                     # Skip unknown RSIDs
-                    if varid == '.':
-                        nunkn += 1
-                        continue
+                    # if varid == '.':
+                    #     nunkn += 1
+                    #     continue
                     # Skip ambiguous strands
                     if SNP_COMPLEMENT[ref] == alt:
                         complement_filter +=1
@@ -104,5 +109,6 @@ if __name__ == '__main__':
         print("{:d} indels deleted".format(indels_filter))
         print("{:d} unknown alleles deleted".format(nalle))
         print("{:d} unknown RSIDs deleted".format(nunkn))
+        print("{:d} missing SNP genotypes deleted".format(ngtmiss))
         print("{:d} complement snps deleted".format(complement_filter))
         print("{:d} SNPs deleted with MAF < {:f}".format(maf_filter, maf_cutoff))
