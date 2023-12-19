@@ -148,6 +148,25 @@ process filltags {
     """
 }
 
+
+process rename_snp_ids {
+
+    publishDir "${params.outdir}/", mode: 'copy'
+
+    cpus 4
+    memory "8 GB"
+
+    input:
+    path vcf_file
+
+    output:
+    path "${vcf_file.getBaseName(2)}.renamed_ids.vcf.gz"
+
+    """
+    bcftools annotate --set-id '%CHROM\\_%POS\\_%REF\\_%ALT\\_b38' -Oz -o ${vcf_file.getBaseName(2)}.renamed_ids.vcf.gz ${vcf_file}
+    """
+}
+
 process recompress {
     publishDir "${params.outdir}/filtered_vcfs/", mode: 'copy'
 

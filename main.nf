@@ -22,7 +22,7 @@ if (params.help){
 
 // Examples below
 
-include {filltags; filter_vcf_bgz; retain_biallelic; ldprune; keep_samples; annotate_dbsnp; recompress} from './modules/filters.nf'
+include {rename_snp_ids; filltags; filter_vcf_bgz; retain_biallelic; ldprune; keep_samples; annotate_dbsnp; recompress} from './modules/filters.nf'
 
 
 workflow all {
@@ -58,6 +58,12 @@ workflow filltags_only {
 
     def vcf_files = Channel.fromPath(params.filteredVcfs)
     filltags(vcf_files)
+}
+
+workflow rename_snpids_only {
+
+    def vcf_file = Channel.fromPath(params.filteredVcfs)
+    rename_snp_ids(vcf_file)
 }
 
 def check_params() {
