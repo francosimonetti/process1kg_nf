@@ -1,23 +1,5 @@
 nextflow.enable.dsl=2
 
-process filter_vcf {
-
-    publishDir "${params.outdir}/filtered_vcfs/", mode: 'copy'
-
-    cpus 2
-    memory "4 GB"
-
-    input:
-    path vcf_file
-
-    output:
-    path "${vcf_file.getBaseName(2)}.MAFfiltered.vcf.gz"
-
-    """
-    filter_vcf.py --in $vcf_file --out ${vcf_file.getBaseName(2)}.MAFfiltered.vcf.gz --maf 0.01
-    """
-}
-
 process filter_vcf_bgz {
 
     publishDir "${params.outdir}/filtered_vcfs/", mode: 'copy'
@@ -30,10 +12,12 @@ process filter_vcf_bgz {
     val maf
 
     output:
-    path "${vcf_file.getBaseName(2)}.MAF_${maf}.vcf.gz"
+    path "${vcf_file.getBaseName(2)}.MAF_${maf}.vcf.gz", emit: vcf
+    path "${vcf_file.getBaseName(2)}.MAF_${maf}.vcf.gz.tbi", emit: vcf_index
 
     """
     bcftools view -q ${maf}:minor -Oz -o ${vcf_file.getBaseName(2)}.MAF_${maf}.vcf.gz $vcf_file
+    bcftools index -t ${vcf_file.getBaseName(2)}.MAF_${maf}.vcf.gz
     """
 }
 

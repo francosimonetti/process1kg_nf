@@ -30,7 +30,7 @@ workflow all {
     def vcf_files = Channel.fromPath(params.readPaths)
     //check_params()
 
-    if( params.keepSamples == "") {
+    if( params.keepSamples == ".") {
         retain_biallelic(vcf_files)    
     } else {
         keep_samples(vcf_files, params.keepSamples)
@@ -38,7 +38,7 @@ workflow all {
     }
     
     filter_vcf_bgz(retain_biallelic.output, params.maf) 
-    
+    filltags(filter_vcf_bgz.out.vcf)
     //ldprune(filter_vcf.output)
 }
 

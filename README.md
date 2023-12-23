@@ -3,10 +3,12 @@
 This respository is intended to pre-process 1000KGP vcf data to be workable with our workflows
 
 This will:
-* Filter SNPs with MAF < 0.001
 * Retain only biallelic SNPs
+* Select specific samples
+* Filter SNPs with MAF < 0.001
 * Perform LD-prunning
-* Generate a single VCF file with all chromosomes
+* Annotate SNPs with RSIDs from dbSNP or rename the SNP ids with consistent naming
+* Update INFO/AC and INFO/AF VCF tags
 
 ## How to run
 
@@ -20,3 +22,14 @@ wget -qO- https://get.nextflow.io | bash
  
 Perform a dry-run to check
 `nextflow run main.nf -preview `
+
+To run a specific workflow you can do:
+
+```
+## Run biallelic and MAF filtering for all 1000G Samples
+nextflow run main.nf -entry all \
+    --readPaths "/my/datasets/1000G_high_coverage/latest/*.vcf.gz" \
+    --keepSamples "." \
+    --maf "0.001" \
+    --outdir "/my/datasets/1000G_high_coverage/latest/processed"
+```

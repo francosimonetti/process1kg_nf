@@ -1,8 +1,8 @@
 ## Run filtering for all 1000G
 nextflow run main.nf -entry all \
     --readPaths "/biodata/franco/datasets/1000G_high_coverage/latest/*.vcf.gz" \
-    --keepSamples = "" \
-    --maf = "0.001" \
+    --keepSamples "." \
+    --maf "0.001" \
     --outdir "/biodata/franco/datasets/1000G_high_coverage/latest/processed"
 
 ## Run annotation only for 1000GKP vcfs
@@ -40,3 +40,11 @@ nextflow run main.nf -entry filltags_only \
 nextflow run main.nf -entry rename_snpids_only \
     --filteredVcfs "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/processed/annotated_vcfs/AnswerALS-866-G-v1-release5_joint-vcf-vqsr-annotated.chr*.samples.biallelic.MAF_0.01.dbSNP.updated.vcf.gz" \
     --outdir "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/processed/annotated_vcfs"
+
+
+## Run all for GTEx 2022
+nextflow run main.nf -entry all \
+    --readPaths "/biodata/franco/datasets/gtex_v8/genotypes/latest_20122023/GTEx_Analysis_2021-02-11_v9_WholeGenomeSeq_944Indiv_Analysis_Freeze.SHAPEIT2_phased.chr*.vcf.gz" \
+    --keepSamples "." \
+    --maf "0.01" \
+    --outdir "/biodata/franco/datasets/gtex_v8/genotypes/latest_20122023/processed"
