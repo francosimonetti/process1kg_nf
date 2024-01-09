@@ -125,10 +125,11 @@ process filltags {
     path vcf_file
     
     output:
-    path "${vcf_file.getBaseName(2)}.updated.vcf.gz"
+    path "${vcf_file.getBaseName(2)}.updated.vcf.gz", emit: vcf
 
     """
     bcftools +fill-tags -Oz -o ${vcf_file.getBaseName(2)}.updated.vcf.gz ${vcf_file} 
+    bcftools index -t "${vcf_file.getBaseName(2)}.updated.vcf.gz"
     """
 }
 
@@ -144,10 +145,11 @@ process rename_snp_ids {
     path vcf_file
 
     output:
-    path "${vcf_file.getBaseName(2)}.renamed_ids.vcf.gz"
+    path "${vcf_file.getBaseName(2)}.renamed_ids.vcf.gz", emit: vcf
 
     """
     bcftools annotate --set-id '%CHROM\\_%POS\\_%REF\\_%ALT\\_b38' -Oz -o ${vcf_file.getBaseName(2)}.renamed_ids.vcf.gz ${vcf_file}
+    bcftools index -t "${vcf_file.getBaseName(2)}.renamed_ids.vcf.gz"
     """
 }
 

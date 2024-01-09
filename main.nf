@@ -39,6 +39,7 @@ workflow all {
     
     filter_vcf_bgz(retain_biallelic.output, params.maf) 
     filltags(filter_vcf_bgz.out.vcf)
+    rename_snp_ids(filltags.out.vcf)
     //ldprune(filter_vcf.output)
 }
 

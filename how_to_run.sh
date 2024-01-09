@@ -18,7 +18,14 @@ nextflow run main.nf -entry rename_snpids_only \
 
 ########
 
-## Run filtering and keep samples for AnswerALS
+## Run filtering and keep samples for AnswerALS (VERSION V5)
+nextflow run main.nf -entry all \
+    --readPaths "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/AnswerALS-866-G-v1-release5_joint-vcf-vqsr-annotated.chr*.vcf.gz" \
+    --keepSamples "/biodata/franco/datasets/answerALS/metadata_v6/genomic_samples_with_rnaseq_v6.txt" \
+    --maf "0.01" \
+    --outdir "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/processed_v6/"
+
+## Run filtering and keep samples for AnswerALS (VERSION V6)
 nextflow run main.nf -entry all \
     --readPaths "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/AnswerALS-866-G-v1-release5_joint-vcf-vqsr-annotated.chr*.vcf.gz" \
     --keepSamples "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/samples_with_rnaseq.txt" \
@@ -36,7 +43,6 @@ nextflow run main.nf -entry filltags_only \
     --outdir "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/processed/"
 
 ## Run rename_ids for AnswerALS
-
 nextflow run main.nf -entry rename_snpids_only \
     --filteredVcfs "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/processed/annotated_vcfs/AnswerALS-866-G-v1-release5_joint-vcf-vqsr-annotated.chr*.samples.biallelic.MAF_0.01.dbSNP.updated.vcf.gz" \
     --outdir "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/processed/annotated_vcfs"
@@ -48,3 +54,9 @@ nextflow run main.nf -entry all \
     --keepSamples "." \
     --maf "0.01" \
     --outdir "/biodata/franco/datasets/gtex_v8/genotypes/latest_20122023/processed"
+
+
+## Run annotation for GTEx 2022
+nextflow run main.nf -entry annotate_only \
+    --filteredVcfs "/biodata/franco/datasets/gtex_v8/genotypes/latest_20122023/processed/filtered_vcfs/GTEx_Analysis_2021-02-11_v9_WholeGenomeSeq_944Indiv_Analysis_Freeze.SHAPEIT2_phased.chr*.biallelic.vcf.gz" \
+    --outdir "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/processed/"
