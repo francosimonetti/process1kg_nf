@@ -36,6 +36,26 @@ process keep_samples {
 
     """
     bcftools view -S ${sample_file} -Oz -o ${vcf_file.getBaseName(2)}.samples.vcf.gz $vcf_file
+    bcftools index -t "${vcf_file.getBaseName(2)}.samples.vcf.gz"
+    """
+}
+
+process keep_samples_force {
+    publishDir "${params.outdir}/filtered_vcfs/", mode: 'copy'
+
+    cpus 2
+    memory "4 GB"
+
+    input:
+    path vcf_file
+    path sample_file
+
+    output:
+    path "${vcf_file.getBaseName(2)}.samples.vcf.gz"
+
+    """
+    bcftools view -S ${sample_file} --force-samples -Oz -o ${vcf_file.getBaseName(2)}.samples.vcf.gz $vcf_file
+    bcftools index -t "${vcf_file.getBaseName(2)}.samples.vcf.gz"
     """
 }
 
@@ -51,9 +71,31 @@ process retain_biallelic {
 
     output:
     path "${vcf_file.getBaseName(2)}.biallelic.vcf.gz"
+    path "*.vcf.gz.tbi"
 
     """
     bcftools view -m2 -M2 -v snps -Oz -o ${vcf_file.getBaseName(2)}.biallelic.vcf.gz $vcf_file
+    bcftools index -t "${vcf_file.getBaseName(2)}.biallelic.vcf.gz"
+    """
+}
+
+process retain_biallelic_snp_indels {
+
+    publishDir "${params.outdir}/filtered_vcfs/", mode: 'copy'
+
+    cpus 2
+    memory "4 GB"
+
+    input:
+    path vcf_file
+
+    output:
+    path "${vcf_file.getBaseName(2)}.biallelic_snps_indels.vcf.gz"
+    path "*.vcf.gz.tbi"
+
+    """
+    bcftools view -m2 -M2 -v snps,indels -Oz -o ${vcf_file.getBaseName(2)}.biallelic_snps_indels.vcf.gz $vcf_file
+    bcftools index -t "${vcf_file.getBaseName(2)}.biallelic_snps_indels.vcf.gz"
     """
 }
 
@@ -77,22 +119,23 @@ process ldprune {
    """
 }
 
-process concat_files {
-    publishDir "${params.outdir}/filtered_vcfs/", mode: 'copy'
+// TODO: doesn't work, unfinished
+// process concat_files {
+//     publishDir "${params.outdir}/filtered_vcfs/", mode: 'copy'
 
-    cpus 4
-    memory "8 GB"
+//     cpus 4
+//     memory "8 GB"
 
-    input:
-    path vcf_file_list    
+//     input:
+//     path vcf_file_list    
 
-    output:
-    path "${params.study_name}.complete.vcf.gz"
+//     output:
+//     path "${params.study_name}.complete.vcf.gz"
 
-    """
-    bcftools concat -f $vcf_file_list -Oz -o ${params.study_name}.complete.vcf.gz
-    """
-}
+//     """
+//     bcftools concat -f $vcf_file_list -Oz -o ${params.study_name}.complete.vcf.gz
+//     """
+// }
 
 process annotate_dbsnp {
     //publishDir "${params.outdir}/annotated_vcfs/", mode: 'copy'
@@ -107,6 +150,7 @@ process annotate_dbsnp {
 
     output:
     path "${vcf_file.getBaseName(2)}.dbSNP.vcf.gz"
+    path "*.vcf.gz.tbi"
 
     """
     bcftools index -t ${vcf_file}
@@ -126,6 +170,7 @@ process filltags {
     
     output:
     path "${vcf_file.getBaseName(2)}.updated.vcf.gz", emit: vcf
+    path "*.vcf.gz.tbi"
 
     """
     bcftools +fill-tags -Oz -o ${vcf_file.getBaseName(2)}.updated.vcf.gz ${vcf_file} 
@@ -136,7 +181,7 @@ process filltags {
 
 process rename_snp_ids {
 
-    publishDir "${params.outdir}/", mode: 'copy'
+    publishDir "${params.outdir}/annotated_vcfs", mode: 'copy'
 
     cpus 4
     memory "8 GB"
@@ -146,6 +191,8 @@ process rename_snp_ids {
 
     output:
     path "${vcf_file.getBaseName(2)}.renamed_ids.vcf.gz", emit: vcf
+    path "*.vcf.gz.tbi"
+
 
     """
     bcftools annotate --set-id '%CHROM\\_%POS\\_%REF\\_%ALT\\_b38' -Oz -o ${vcf_file.getBaseName(2)}.renamed_ids.vcf.gz ${vcf_file}
@@ -164,7 +211,7 @@ process recompress {
 
     output:
     path "${vcf_file.getBaseName(2)}.bgz.vcf.gz", emit: vcf_bgz
-    path "${vcf_file.getBaseName(2)}.bgz.vcf.gz.tbi", emit: index_vcf
+    path "*.vcf.gz.tbi", emit: index_vcf
 
     """
     zcat ${vcf_file} | bcftools view -Oz -o "${vcf_file.getBaseName(2)}.bgz.vcf.gz" -

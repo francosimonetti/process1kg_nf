@@ -22,8 +22,26 @@ if (params.help){
 
 // Examples below
 
-include {rename_snp_ids; filltags; filter_vcf_bgz; retain_biallelic; ldprune; keep_samples; annotate_dbsnp; recompress} from './modules/filters.nf'
+include {rename_snp_ids; filltags; filter_vcf_bgz; retain_biallelic; retain_biallelic_snp_indels; ldprune; keep_samples; keep_samples_force; annotate_dbsnp; recompress} from './modules/filters.nf'
 
+
+workflow filter_snps_indels_only {
+
+    def vcf_files = Channel.fromPath(params.readPaths)
+    //check_params()
+    dbsnpfile = params.dbsnpfile
+    dbsnpfile_index = params.dbsnpfile_index
+
+    if( params.keepSamples == ".") {
+        retain_biallelic_snp_indels(vcf_files)    
+    } else {
+        keep_samples(vcf_files, params.keepSamples)
+        retain_biallelic_snp_indels(keep_samples.output)
+    }
+
+    annotate_dbsnp(retain_biallelic_snp_indels.output[0], dbsnpfile, dbsnpfile_index)
+    filltags(annotate_dbsnp.output[0])
+}
 
 workflow all {
 
@@ -41,6 +59,16 @@ workflow all {
     filltags(filter_vcf_bgz.out.vcf)
     rename_snp_ids(filltags.out.vcf)
     //ldprune(filter_vcf.output)
+}
+
+workflow geuvadis {
+    def vcf_files = Channel.fromPath(params.readPaths)
+
+    keep_samples_force(vcf_files, params.keepSamples)
+    filltags(keep_samples_force.output)
+    rename_snp_ids(filltags.out.vcf)
+    // Filter MAF at the end, more convenient
+    filter_vcf_bgz(rename_snp_ids.out.vcf, params.maf) 
 }
 
 workflow annotate_only {

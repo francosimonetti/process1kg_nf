@@ -56,7 +56,21 @@ nextflow run main.nf -entry all \
     --outdir "/biodata/franco/datasets/gtex_v8/genotypes/latest_20122023/processed"
 
 
+## Run all for GTEx 2022 with INDELs!
+nextflow run main.nf -entry filter_snps_indels_only \
+    --readPaths "/biodata/franco/datasets/gtex_v8/genotypes/latest_20122023/GTEx_Analysis_2021-02-11_v9_WholeGenomeSeq_944Indiv_Analysis_Freeze.SHAPEIT2_phased.chr*.vcf.gz" \
+    --keepSamples "." \
+    --outdir "/biodata/franco/datasets/gtex_v8/genotypes/latest_20122023/processed"
+
 ## Run annotation for GTEx 2022
 nextflow run main.nf -entry annotate_only \
     --filteredVcfs "/biodata/franco/datasets/gtex_v8/genotypes/latest_20122023/processed/filtered_vcfs/GTEx_Analysis_2021-02-11_v9_WholeGenomeSeq_944Indiv_Analysis_Freeze.SHAPEIT2_phased.chr*.biallelic.vcf.gz" \
-    --outdir "/biodata/franco/datasets/answerALS/genomics/4_JointGenotyping/processed/"
+    --outdir "/biodata/franco/datasets/gtex_v8/genotypes/latest_20122023/processed/"
+
+
+## Run worflow to extract GEUVADIS samples from 1000G dataset
+nextflow run main.nf -entry geuvadis \
+    --readPaths "/biodata/franco/datasets/1000G_high_coverage/latest/processed/filtered_vcfs/1kGP_high_coverage_Illumina.chr*.filtered.SNV_INDEL_SV_phased_panel.biallelic.vcf.gz" \
+    --keepSamples "/biodata/franco/datasets/geuvadis/reprocess/fsimonetti-nfdata-aws/FULL/geuvadis.sample_ids.txt" \
+    --maf "0.01" \
+    --outdir "/biodata/franco/datasets/geuvadis/genotypes/latest_from1000G_high_coverage/"
