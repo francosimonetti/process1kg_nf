@@ -74,3 +74,22 @@ nextflow run main.nf -entry geuvadis \
     --keepSamples "/biodata/franco/datasets/geuvadis/reprocess/fsimonetti-nfdata-aws/FULL/geuvadis.sample_ids.txt" \
     --maf "0.01" \
     --outdir "/biodata/franco/datasets/geuvadis/genotypes/latest_from1000G_high_coverage/"
+
+
+
+## Run all for UCT agusting data, keep snps and indels but only biallelic
+nextflow run main.nf -entry filter_snps_indels_only \
+    --readPaths "/biodata/franco/agustin/ld_myh7/chr*.UCT.vcf.gz" \
+    --keepSamples "." \
+    --outdir "/biodata/franco/agustin/ld_myh7"
+
+nextflow run main.nf -entry filter_snps_indels_only \
+    --readPaths "/biodata/franco/agustin/genotipado_conjunto_UCT_malbran_hg38_2024_ok.vcf.gz" \
+    --keepSamples "." \
+    --outdir "/biodata/franco/agustin/"
+
+## Run for MESA dataset
+nextflow run main.nf -entry filter_snps_indels_only \
+    --readPaths "/biodata/franco/datasets/mesa/downloads/genotype_merge/MESA_phs001416_TOPMed_WGS_freeze.9b.chr*.hg38.merged.vcf.gz" \
+    --keepSamples "." \
+    --outdir "/biodata/franco/datasets/mesa/downloads/genotype_merge/processed"

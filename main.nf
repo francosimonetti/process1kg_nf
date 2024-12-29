@@ -39,8 +39,9 @@ workflow filter_snps_indels_only {
         retain_biallelic_snp_indels(keep_samples.output)
     }
 
-    annotate_dbsnp(retain_biallelic_snp_indels.output[0], dbsnpfile, dbsnpfile_index)
-    filltags(annotate_dbsnp.output[0])
+    rename_snp_ids(retain_biallelic_snp_indels.output[0])
+    //annotate_dbsnp(retain_biallelic_snp_indels.output[0], dbsnpfile, dbsnpfile_index)
+    //filltags(annotate_dbsnp.output[0])
 }
 
 workflow all {
